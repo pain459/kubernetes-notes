@@ -1,0 +1,49 @@
+ubuntu@ip-172-31-13-34:~$ docker version
+Client: Docker Engine - Community
+ Version:           20.10.8
+ API version:       1.41
+ Go version:        go1.16.6
+ Git commit:        3967b7d
+ Built:             Fri Jul 30 19:54:27 2021
+ OS/Arch:           linux/amd64
+ Context:           default
+ Experimental:      true
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          20.10.8
+  API version:      1.41 (minimum version 1.12)
+  Go version:       go1.16.6
+  Git commit:       75249d8
+  Built:            Fri Jul 30 19:52:33 2021
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          1.4.9
+  GitCommit:        e25210fe30a0a703442421b0f60afac609f950a3
+ runc:
+  Version:          1.0.1
+  GitCommit:        v1.0.1-0-g4144b63
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+ubuntu@ip-172-31-13-34:~$ minikube start --driver=docker
+* minikube v1.22.0 on Ubuntu 20.04 (xen/amd64)
+* Using the docker driver based on user configuration
+* Starting control plane node minikube in cluster minikube
+* Pulling base image ...
+* Downloading Kubernetes v1.21.2 preload ...
+    > preloaded-images-k8s-v11-v1...: 502.14 MiB / 502.14 MiB  100.00% 106.98 M
+    > gcr.io/k8s-minikube/kicbase...: 361.08 MiB / 361.09 MiB  100.00% 14.82 Mi
+* Creating docker container (CPUs=2, Memory=2200MB) ...
+* Preparing Kubernetes v1.21.2 on Docker 20.10.7 ...
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+ubuntu@ip-172-31-13-34:~$ minikube config set driver docker
+! These changes will take effect upon a minikube delete and then a minikube start
+ubuntu@ip-172-31-13-34:~$
