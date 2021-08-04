@@ -1,0 +1,15 @@
+ubuntu@ip-172-31-13-34:~$ minikube version
+minikube version: v1.22.0
+commit: a03fbcf166e6f74ef224d4a63be4277d017bb62e
+ubuntu@ip-172-31-13-34:~$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.1", GitCommit:"5e58841cce77d4bc13713ad2b91fa0d961e69192", GitTreeState:"clean", BuildDate:"2021-05-13T02:40:46Z", GoVersion:"go1.16.3", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:53:14Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"linux/amd64"}
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+No resources found in default namespace.
+ubuntu@ip-172-31-13-34:~$ kubectl get nodes
+NAME       STATUS   ROLES                  AGE     VERSION
+minikube   Ready    control-plane,master   6m21s   v1.21.2
+ubuntu@ip-172-31-13-34:~$ kubectl get service
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   6m29s
+ubuntu@ip-172-31-13-34:~$

@@ -1,0 +1,62 @@
+ubuntu@ip-172-31-13-34:~$ kubectl create deployment nginx-test1 --image=nginx
+deployment.apps/nginx-test1 created
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+nginx-test1-664f6969cd-6kjph   1/1     Running   0          28s
+ubuntu@ip-172-31-13-34:~$ kubectl expose deployment nginx-test1 --type=NodePort --port=8080
+service/nginx-test1 exposed
+ubuntu@ip-172-31-13-34:~$ kubectl get deployment
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-test1   1/1     1            1           5m19s
+ubuntu@ip-172-31-13-34:~$ kubectl get replicaset
+NAME                     DESIRED   CURRENT   READY   AGE
+nginx-test1-664f6969cd   1         1         1       5m28s
+ubuntu@ip-172-31-13-34:~$
+
+# I just edited the deployment to create 3 replicas.
+
+ubuntu@ip-172-31-13-34:~$ kubectl edit deployment nginx-test1
+deployment.apps/nginx-test1 edited
+ubuntu@ip-172-31-13-34:~$ kubectl get replicaset
+NAME                     DESIRED   CURRENT   READY   AGE
+nginx-test1-664f6969cd   3         3         2       8m25s
+ubuntu@ip-172-31-13-34:~$ kubectl get deployment
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-test1   3/3     3            3           8m32s
+ubuntu@ip-172-31-13-34:~$
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+nginx-test1-664f6969cd-6kjph   1/1     Running   0          9m
+nginx-test1-664f6969cd-d6t26   1/1     Running   0          40s
+nginx-test1-664f6969cd-tclwq   1/1     Running   0          40s
+ubuntu@ip-172-31-13-34:~$
+
+# Now I edited the deployment to use the specific version
+
+ubuntu@ip-172-31-13-34:~$ kubectl edit deployment
+deployment.apps/nginx-test1 edited
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+NAME                           READY   STATUS              RESTARTS   AGE
+nginx-test1-59d76658b9-fgzmj   0/1     ContainerCreating   0          6s
+nginx-test1-664f6969cd-6kjph   1/1     Running             0          10m
+nginx-test1-664f6969cd-d6t26   1/1     Running             0          2m18s
+nginx-test1-664f6969cd-tclwq   1/1     Running             0          2m18s
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+NAME                           READY   STATUS              RESTARTS   AGE
+nginx-test1-59d76658b9-fgzmj   0/1     ContainerCreating   0          9s
+nginx-test1-664f6969cd-6kjph   1/1     Running             0          10m
+nginx-test1-664f6969cd-d6t26   1/1     Running             0          2m21s
+nginx-test1-664f6969cd-tclwq   1/1     Running             0          2m21s
+ubuntu@ip-172-31-13-34:~$ kubectl get deployment
+NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-test1   3/3     2            3           10m
+ubuntu@ip-172-31-13-34:~$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+nginx-test1-59d76658b9-fgzmj   1/1     Running   0          32s
+nginx-test1-59d76658b9-z7797   1/1     Running   0          18s
+nginx-test1-59d76658b9-znsjn   1/1     Running   0          22s
+ubuntu@ip-172-31-13-34:~$ kubectl get replicaset
+NAME                     DESIRED   CURRENT   READY   AGE
+nginx-test1-59d76658b9   3         3         3       43s
+nginx-test1-664f6969cd   0         0         0       11m
+ubuntu@ip-172-31-13-34:~$
