@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset-app
+  labels:
+    purpose: qa
+    # owner is matching the old deployment. This is maintained to test the replicaset feature.
+    owner: kumarrav
+spec:
+  template:
+    metadata:
+      name: nginx-replicaset-test-app
+      labels:
+        purpose: qa
+        owner: kumarrav
+    spec:
+      containers:
+        - name: nginx-image
+          image: nginx:1.17
+  replicas: 3
+  selector:
+    matchLabels:
+        # This label is used in the other container too.
+        owner: kumarrav

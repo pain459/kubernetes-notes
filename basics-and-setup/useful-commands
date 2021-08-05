@@ -1,0 +1,19 @@
+$ kubectl get node      # To check the nodes of the cluster.
+$ kubectl get pods      # To get the list of pods running.
+$ kubectl get pods -o wide      # This command will display additional information like IP address and node details.
+$ kubectl run nginx1 --image=nginx:1.17     # to create a nginx pod on the cluster.
+$ kubectl describe pod <name>     # To get the additional information of the running pod along with events.
+$ kubectl create -f <config.yaml>     # This will create container based on the config at yaml file.
+$ kubectl apply -f <config.yaml>      # Same purpose as above.
+$ kubectl delete pod <name>     # to delete the running pod and containers in them.
+$ kubectl edit pod/deployment <podname/deployment name>     # This will edit the existing pod data and pull the changes.
+$ kubectl edit pod <podname>      # Same as above.
+$ kubectl run redis --image=redis123 --dry-run=client -o yaml > pod.yaml      # In this method we can create a yaml file for any pod creation.
+$ kubectl run nginx2 --image=nginx:1.17 --dry-run=client      # This is a sample command but, with --dry-run=client at the end, we can simple do a dry run without creating anything.
+$ kubectl get replicationcontroller      # This command will display the replication controller configs.
+$ kubectl replace -f <config.yaml>      # Apply the config file with changed values.
+$ kubectl scale --replicas=6 -f config.yaml     # Dynamic update of the existing replicaset. Config.yml file will not get updated in this case.
+$ kubectl scope --replicas=6 <type> <name>      # One more dynamic way to update the existing replicaset. No file will be updated.
+$ kubectl delete replicationcontroller nginx-app      # To delete the replication controller
+$ kubectl exec nginx-replicaset-app-qzhtd -it -- bash     # To ssh get into the pod.
+$ kubectl exec <pod> <options> -- <command>     # Syntax of the above.

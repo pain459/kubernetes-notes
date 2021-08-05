@@ -27,6 +27,10 @@ Server: Docker Engine - Community
  docker-init:
   Version:          0.19.0
   GitCommit:        de40ad0
+
+Install minikube from https://minikube.sigs.k8s.io/docs/start/
+and install kubectl with snapd on ubuntu. "sudo snapd install kubectl --classic"
+
 ubuntu@ip-172-31-13-34:~$ minikube start --driver=docker
 * minikube v1.22.0 on Ubuntu 20.04 (xen/amd64)
 * Using the docker driver based on user configuration
