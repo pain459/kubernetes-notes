@@ -1,0 +1,146 @@
+# image name should be correct. Else the deployment will fail.
+
+ubuntu@ip-172-31-13-34:~$ kubectl create deployment mongodb-test2 --image=mongo
+deployment.apps/mongodb-test2 created
+ubuntu@ip-172-31-13-34:~$ kubectl get pod
+NAME                             READY   STATUS              RESTARTS   AGE
+mongodb-test1-798c444864-9vbvt   0/1     ErrImagePull        0          115s
+mongodb-test2-cc89d5ff9-lvndq    0/1     ContainerCreating   0          7s
+ubuntu@ip-172-31-13-34:~$ kubectl get pod
+NAME                             READY   STATUS              RESTARTS   AGE
+mongodb-test1-798c444864-9vbvt   0/1     ImagePullBackOff    0          2m1s
+mongodb-test2-cc89d5ff9-lvndq    0/1     ContainerCreating   0          13s
+ubuntu@ip-172-31-13-34:~$
+ubuntu@ip-172-31-13-34:~$ kubectl get pod
+NAME                             READY   STATUS             RESTARTS   AGE
+mongodb-test1-798c444864-9vbvt   0/1     ImagePullBackOff   0          2m51s
+mongodb-test2-cc89d5ff9-lvndq    1/1     Running            0          63s
+
+# Checking logs of running container.
+
+ubuntu@ip-172-31-13-34:~$ kubectl logs mongodb-test2-cc89d5ff9-lvndq
+{"t":{"$date":"2021-08-04T08:58:34.992+00:00"},"s":"I",  "c":"NETWORK",  "id":4915701, "ctx":"-","msg":"Initialized wire specification","attr":{"spec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":13},"incomingInternalClient":{"minWireVersion":0,"maxWireVersion":13},"outgoing":{"minWireVersion":0,"maxWireVersion":13},"isInternalClient":true}}}
+{"t":{"$date":"2021-08-04T08:58:34.993+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to force-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+{"t":{"$date":"2021-08-04T08:58:35.001+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
+{"t":{"$date":"2021-08-04T08:58:35.001+00:00"},"s":"I",  "c":"NETWORK",  "id":4648601, "ctx":"main","msg":"Implicit TCP FastOpen unavailable. If TCP FastOpen is required, set tcpFastOpenServer, tcpFastOpenClient, and tcpFastOpenQueueSize."}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"W",  "c":"ASIO",     "id":22601,   "ctx":"main","msg":"No TransportLayer configured during NetworkInterface startup"}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"REPL",     "id":5123008, "ctx":"main","msg":"Successfully registered PrimaryOnlyService","attr":{"service":"TenantMigrationDonorService","ns":"config.tenantMigrationDonors"}}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"REPL",     "id":5123008, "ctx":"main","msg":"Successfully registered PrimaryOnlyService","attr":{"service":"TenantMigrationRecipientService","ns":"config.tenantMigrationRecipients"}}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"CONTROL",  "id":4615611, "ctx":"initandlisten","msg":"MongoDB starting","attr":{"pid":1,"port":27017,"dbPath":"/data/db","architecture":"64-bit","host":"mongodb-test2-cc89d5ff9-lvndq"}}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"CONTROL",  "id":23403,   "ctx":"initandlisten","msg":"Build Info","attr":{"buildInfo":{"version":"5.0.1","gitVersion":"318fd9cabc59dc9651f3189b622af6e06ab6cd33","openSSLVersion":"OpenSSL 1.1.1f  31 Mar 2020","modules":[],"allocator":"tcmalloc","environment":{"distmod":"ubuntu2004","distarch":"x86_64","target_arch":"x86_64"}}}}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"CONTROL",  "id":51765,   "ctx":"initandlisten","msg":"Operating System","attr":{"os":{"name":"Ubuntu","version":"20.04"}}}
+{"t":{"$date":"2021-08-04T08:58:35.003+00:00"},"s":"I",  "c":"CONTROL",  "id":21951,   "ctx":"initandlisten","msg":"Options set by command line","attr":{"options":{"net":{"bindIp":"*"}}}}
+{"t":{"$date":"2021-08-04T08:58:35.004+00:00"},"s":"I",  "c":"STORAGE",  "id":22297,   "ctx":"initandlisten","msg":"Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem","tags":["startupWarnings"]}
+{"t":{"$date":"2021-08-04T08:58:35.004+00:00"},"s":"I",  "c":"STORAGE",  "id":22315,   "ctx":"initandlisten","msg":"Opening WiredTiger","attr":{"config":"create,cache_size=1454M,session_max=33000,eviction=(threads_min=4,threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),builtin_extension_config=(zstd=(compression_level=6)),file_manager=(close_idle_time=600,close_scan_interval=10,close_handle_minimum=250),statistics_log=(wait=0),verbose=[recovery_progress,checkpoint_progress,compact_progress],"}}
+{"t":{"$date":"2021-08-04T08:58:35.719+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1628067515:719733][1:0x7fede1274c80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Set global recovery timestamp: (0, 0)"}}
+{"t":{"$date":"2021-08-04T08:58:35.719+00:00"},"s":"I",  "c":"STORAGE",  "id":22430,   "ctx":"initandlisten","msg":"WiredTiger message","attr":{"message":"[1628067515:719793][1:0x7fede1274c80], txn-recover: [WT_VERB_RECOVERY | WT_VERB_RECOVERY_PROGRESS] Set global oldest timestamp: (0, 0)"}}
+{"t":{"$date":"2021-08-04T08:58:35.728+00:00"},"s":"I",  "c":"STORAGE",  "id":4795906, "ctx":"initandlisten","msg":"WiredTiger opened","attr":{"durationMillis":724}}
+{"t":{"$date":"2021-08-04T08:58:35.728+00:00"},"s":"I",  "c":"RECOVERY", "id":23987,   "ctx":"initandlisten","msg":"WiredTiger recoveryTimestamp","attr":{"recoveryTimestamp":{"$timestamp":{"t":0,"i":0}}}}
+{"t":{"$date":"2021-08-04T08:58:35.743+00:00"},"s":"I",  "c":"STORAGE",  "id":4366408, "ctx":"initandlisten","msg":"No table logging settings modifications are required for existing WiredTiger tables","attr":{"loggingEnabled":true}}
+{"t":{"$date":"2021-08-04T08:58:35.743+00:00"},"s":"I",  "c":"STORAGE",  "id":22262,   "ctx":"initandlisten","msg":"Timestamp monitor starting"}
+{"t":{"$date":"2021-08-04T08:58:35.750+00:00"},"s":"W",  "c":"CONTROL",  "id":22120,   "ctx":"initandlisten","msg":"Access control is not enabled for the database. Read and write access to data and configuration is unrestricted","tags":["startupWarnings"]}
+{"t":{"$date":"2021-08-04T08:58:35.750+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"admin.system.version","uuidDisposition":"provided","uuid":{"uuid":{"$uuid":"b43ea16a-5d60-46b3-8cbe-d555525b2d42"}},"options":{"uuid":{"$uuid":"b43ea16a-5d60-46b3-8cbe-d555525b2d42"}}}}
+{"t":{"$date":"2021-08-04T08:58:35.763+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"admin.system.version","index":"_id_","commitTimestamp":null}}
+{"t":{"$date":"2021-08-04T08:58:35.763+00:00"},"s":"I",  "c":"REPL",     "id":20459,   "ctx":"initandlisten","msg":"Setting featureCompatibilityVersion","attr":{"newVersion":"5.0"}}
+{"t":{"$date":"2021-08-04T08:58:35.763+00:00"},"s":"I",  "c":"NETWORK",  "id":4915702, "ctx":"initandlisten","msg":"Updated wire specification","attr":{"oldSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":13},"incomingInternalClient":{"minWireVersion":0,"maxWireVersion":13},"outgoing":{"minWireVersion":0,"maxWireVersion":13},"isInternalClient":true},"newSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":13},"incomingInternalClient":{"minWireVersion":13,"maxWireVersion":13},"outgoing":{"minWireVersion":13,"maxWireVersion":13},"isInternalClient":true}}}
+{"t":{"$date":"2021-08-04T08:58:35.763+00:00"},"s":"I",  "c":"NETWORK",  "id":4915702, "ctx":"initandlisten","msg":"Updated wire specification","attr":{"oldSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":13},"incomingInternalClient":{"minWireVersion":13,"maxWireVersion":13},"outgoing":{"minWireVersion":13,"maxWireVersion":13},"isInternalClient":true},"newSpec":{"incomingExternalClient":{"minWireVersion":0,"maxWireVersion":13},"incomingInternalClient":{"minWireVersion":13,"maxWireVersion":13},"outgoing":{"minWireVersion":13,"maxWireVersion":13},"isInternalClient":true}}}
+{"t":{"$date":"2021-08-04T08:58:35.764+00:00"},"s":"I",  "c":"STORAGE",  "id":5071100, "ctx":"initandlisten","msg":"Clearing temp directory"}
+{"t":{"$date":"2021-08-04T08:58:35.764+00:00"},"s":"I",  "c":"CONTROL",  "id":20536,   "ctx":"initandlisten","msg":"Flow Control is enabled on this deployment"}
+{"t":{"$date":"2021-08-04T08:58:35.769+00:00"},"s":"I",  "c":"FTDC",     "id":20625,   "ctx":"initandlisten","msg":"Initializing full-time diagnostic data capture","attr":{"dataDirectory":"/data/db/diagnostic.data"}}
+{"t":{"$date":"2021-08-04T08:58:35.769+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"initandlisten","msg":"createCollection","attr":{"namespace":"local.startup_log","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"f5ce09cb-20e0-4fbe-910c-f9fddc7484d4"}},"options":{"capped":true,"size":10485760}}}
+{"t":{"$date":"2021-08-04T08:58:35.787+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"initandlisten","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"local.startup_log","index":"_id_","commitTimestamp":null}}
+{"t":{"$date":"2021-08-04T08:58:35.788+00:00"},"s":"I",  "c":"STORAGE",  "id":20320,   "ctx":"LogicalSessionCacheRefresh","msg":"createCollection","attr":{"namespace":"config.system.sessions","uuidDisposition":"generated","uuid":{"uuid":{"$uuid":"d8480202-e459-493c-a484-101391686010"}},"options":{}}}
+{"t":{"$date":"2021-08-04T08:58:35.789+00:00"},"s":"I",  "c":"CONTROL",  "id":20712,   "ctx":"LogicalSessionCacheReap","msg":"Sessions collection is not set up; waiting until next sessions reap interval","attr":{"error":"NamespaceNotFound: config.system.sessions does not exist"}}
+{"t":{"$date":"2021-08-04T08:58:35.789+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"/tmp/mongodb-27017.sock"}}
+{"t":{"$date":"2021-08-04T08:58:35.789+00:00"},"s":"I",  "c":"NETWORK",  "id":23015,   "ctx":"listener","msg":"Listening on","attr":{"address":"0.0.0.0"}}
+{"t":{"$date":"2021-08-04T08:58:35.789+00:00"},"s":"I",  "c":"NETWORK",  "id":23016,   "ctx":"listener","msg":"Waiting for connections","attr":{"port":27017,"ssl":"off"}}
+{"t":{"$date":"2021-08-04T08:58:35.809+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"_id_","commitTimestamp":null}}
+{"t":{"$date":"2021-08-04T08:58:35.809+00:00"},"s":"I",  "c":"INDEX",    "id":20345,   "ctx":"LogicalSessionCacheRefresh","msg":"Index build: done building","attr":{"buildUUID":null,"namespace":"config.system.sessions","index":"lsidTTLIndex","commitTimestamp":null}}
+ubuntu@ip-172-31-13-34:~$
+
+# we can check more data with 'kubectl describe pod <pod-name>'
+
+ubuntu@ip-172-31-13-34:~$ kubectl describe pod mongodb-test2
+Name:         mongodb-test2-cc89d5ff9-lvndq
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Wed, 04 Aug 2021 08:58:12 +0000
+Labels:       app=mongodb-test2
+              pod-template-hash=cc89d5ff9
+Annotations:  <none>
+Status:       Running
+IP:           172.17.0.4
+IPs:
+  IP:           172.17.0.4
+Controlled By:  ReplicaSet/mongodb-test2-cc89d5ff9
+Containers:
+  mongo:
+    Container ID:   docker://3bc95bcc46f1cb3b879da370ee68e2169ef9b2e7a13f13416487134f58f0a3aa
+    Image:          mongo
+    Image ID:       docker-pullable://mongo@sha256:d78c7ace6822297a7e1c7076eb9a7560a81a6ef856ab8d9cde5d18438ca9e8bf
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Wed, 04 Aug 2021 08:58:34 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-jgprq (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  kube-api-access-jgprq:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  3m6s   default-scheduler  Successfully assigned default/mongodb-test2-cc89d5ff9-lvndq to minikube
+  Normal  Pulling    3m6s   kubelet            Pulling image "mongo"
+  Normal  Pulled     2m48s  kubelet            Successfully pulled image "mongo" in 17.739651242s
+  Normal  Created    2m44s  kubelet            Created container mongo
+  Normal  Started    2m44s  kubelet            Started container mongo
+
+ubuntu@ip-172-31-13-34:~$
+
+# How to get into container to see the logs or for debugging.
+
+ubuntu@ip-172-31-13-34:~$ kubectl exec -it mongodb-test2-cc89d5ff9-lvndq -- /bin/bash
+root@mongodb-test2-cc89d5ff9-lvndq:/# ls
+bin  boot  data  dev  docker-entrypoint-initdb.d  etc  home  js-yaml.js  lib  lib32  lib64  libx32  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@mongodb-test2-cc89d5ff9-lvndq:/#
+root@mongodb-test2-cc89d5ff9-lvndq:/# exit
+exit
+ubuntu@ip-172-31-13-34:~$
+
+# We will delete the deployments now which will delete the underlying pods.
+
+ubuntu@ip-172-31-13-34:~$ kubectl get deployment
+NAME            READY   UP-TO-DATE   AVAILABLE   AGE
+mongodb-test1   0/1     1            0           18m
+mongodb-test2   1/1     1            1           16m
+ubuntu@ip-172-31-13-34:~$ kubectl get pod
+NAME                             READY   STATUS             RESTARTS   AGE
+mongodb-test1-798c444864-9vbvt   0/1     ImagePullBackOff   0          18m
+mongodb-test2-cc89d5ff9-lvndq    1/1     Running            0          16m
+ubuntu@ip-172-31-13-34:~$ kubectl delete deployment mongodb-test1 mongodb-test2
+deployment.apps "mongodb-test1" deleted
+deployment.apps "mongodb-test2" deleted
+ubuntu@ip-172-31-13-34:~$ kubectl get pod
+NAME                             READY   STATUS        RESTARTS   AGE
+mongodb-test1-798c444864-9vbvt   0/1     Terminating   0          19m
+mongodb-test2-cc89d5ff9-lvndq    0/1     Terminating   0          17m
+ubuntu@ip-172-31-13-34:~$

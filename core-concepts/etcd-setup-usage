@@ -1,0 +1,101 @@
+[root@bf9bf04ea65c /]# ETCD_VER=v3.5.0
+[root@bf9bf04ea65c /]#
+[root@bf9bf04ea65c /]# # choose either URL
+[root@bf9bf04ea65c /]# GOOGLE_URL=https://storage.googleapis.com/etcd
+[root@bf9bf04ea65c /]# GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
+[root@bf9bf04ea65c /]# DOWNLOAD_URL=${GOOGLE_URL}
+[root@bf9bf04ea65c /]#
+[root@bf9bf04ea65c /]# rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+/tmp/etcd-download-test/etcdctl version
+/tmp/etcd-download-test/etcdutl version
+[root@bf9bf04ea65c /]# rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
+[root@bf9bf04ea65c /]#
+[root@bf9bf04ea65c /]# curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 18.4M  100 18.4M    0     0  3824k      0  0:00:04  0:00:04 --:--:-- 3824k
+[root@bf9bf04ea65c /]# tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
+etcd-v3.5.0-linux-amd64/Documentation/
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/apispec/
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/apispec/swagger/
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/apispec/swagger/v3lock.swagger.json
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/apispec/swagger/v3election.swagger.json
+etcd-v3.5.0-linux-amd64/Documentation/dev-guide/apispec/swagger/rpc.swagger.json
+etcd-v3.5.0-linux-amd64/Documentation/README.md
+etcd-v3.5.0-linux-amd64/README-etcdutl.md
+etcd-v3.5.0-linux-amd64/READMEv2-etcdctl.md
+etcd-v3.5.0-linux-amd64/README-etcdctl.md
+etcd-v3.5.0-linux-amd64/README.md
+etcd-v3.5.0-linux-amd64/etcdutl
+etcd-v3.5.0-linux-amd64/etcdctl
+etcd-v3.5.0-linux-amd64/etcd
+[root@bf9bf04ea65c /]# rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+[root@bf9bf04ea65c /]#
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcd --version
+etcd Version: 3.5.0
+Git SHA: 946a5a6f2
+Go Version: go1.16.3
+Go OS/Arch: linux/amd64
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcdctl version
+etcdctl version: 3.5.0
+API version: 3.5
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcdutl version
+etcdutl version: 3.5.0
+API version: 3.5
+[root@bf9bf04ea65c /]#
+
+----
+
+Running a sample server.
+
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcd
+{"level":"info","ts":"2021-08-04T13:24:53.551Z","caller":"etcdmain/etcd.go:72","msg":"Running: ","args":["/tmp/etcd-download-test/etcd"]}
+{"level":"warn","ts":"2021-08-04T13:24:53.551Z","caller":"etcdmain/etcd.go:104","msg":"'data-dir' was empty; using default","data-dir":"default.etcd"}
+{"level":"info","ts":"2021-08-04T13:24:53.551Z","caller":"etcdmain/etcd.go:115","msg":"server has been already initialized","data-dir":"default.etcd","dir-type":"member"}
+{"level":"info","ts":"2021-08-04T13:24:53.551Z","caller":"embed/etcd.go:131","msg":"configuring peer listeners","listen-peer-urls":["http://localhost:2380"]}
+{"level":"info","ts":"2021-08-04T13:24:53.552Z","caller":"embed/etcd.go:139","msg":"configuring client listeners","listen-client-urls":["http://localhost:2379"]}
+{"level":"info","ts":"2021-08-04T13:24:53.552Z","caller":"embed/etcd.go:307","msg":"starting an etcd server","etcd-version":"3.5.0","git-sha":"946a5a6f2","go-version":"go1.16.3","go-os":"linux","go-arch":"amd64","max-cpu-set":2,"max-cpu-available":2,"member-initialized":true,"name":"default","data-dir":"default.etcd","wal-dir":"","wal-dir-dedicated":"","member-dir":"default.etcd/member","force-new-cluster":false,"heartbeat-interval":"100ms","election-timeout":"1s","initial-election-tick-advance":true,"snapshot-count":100000,"snapshot-catchup-entries":5000,"initial-advertise-peer-urls":["http://localhost:2380"],"listen-peer-urls":["http://localhost:2380"],"advertise-client-urls":["http://localhost:2379"],"listen-client-urls":["http://localhost:2379"],"listen-metrics-urls":[],"cors":["*"],"host-whitelist":["*"],"initial-cluster":"","initial-cluster-state":"new","initial-cluster-token":"","quota-size-bytes":2147483648,"pre-vote":true,"initial-corrupt-check":false,"corrupt-check-time-interval":"0s","auto-compaction-mode":"periodic","auto-compaction-retention":"0s","auto-compaction-interval":"0s","discovery-url":"","discovery-proxy":"","downgrade-check-interval":"5s"}
+{"level":"info","ts":"2021-08-04T13:24:53.553Z","caller":"etcdserver/backend.go:81","msg":"opened backend db","path":"default.etcd/member/snap/db","took":"160.048µs"}
+{"level":"info","ts":"2021-08-04T13:24:53.553Z","caller":"etcdserver/server.go:526","msg":"No snapshot found. Recovering WAL from scratch!"}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","caller":"etcdserver/raft.go:483","msg":"restarting local member","cluster-id":"cdf818194e3a8c32","local-member-id":"8e9e05c52164694d","commit-index":4}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d switched to configuration voters=()"}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d became follower at term 2"}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"newRaft 8e9e05c52164694d [peers: [], term: 2, commit: 4, applied: 0, lastindex: 4, lastterm: 2]"}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","caller":"api/capability.go:75","msg":"enabled capabilities for version","cluster-version":"3.5"}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","caller":"membership/cluster.go:276","msg":"recovered/added member from store","cluster-id":"cdf818194e3a8c32","local-member-id":"8e9e05c52164694d","recovered-remote-peer-id":"8e9e05c52164694d","recovered-remote-peer-urls":["http://localhost:2380"]}
+{"level":"info","ts":"2021-08-04T13:24:53.554Z","caller":"membership/cluster.go:285","msg":"set cluster version from store","cluster-version":"3.5"}
+{"level":"warn","ts":"2021-08-04T13:24:53.556Z","caller":"auth/store.go:1220","msg":"simple token is not cryptographically signed"}
+{"level":"info","ts":"2021-08-04T13:24:53.557Z","caller":"mvcc/kvstore.go:415","msg":"kvstore restored","current-rev":1}
+{"level":"info","ts":"2021-08-04T13:24:53.558Z","caller":"etcdserver/quota.go:94","msg":"enabled backend quota with default value","quota-name":"v3-applier","quota-size-bytes":2147483648,"quota-size":"2.1 GB"}
+{"level":"info","ts":"2021-08-04T13:24:53.559Z","caller":"etcdserver/server.go:834","msg":"starting etcd server","local-member-id":"8e9e05c52164694d","local-server-version":"3.5.0","cluster-id":"cdf818194e3a8c32","cluster-version":"3.5"}
+{"level":"info","ts":"2021-08-04T13:24:53.561Z","caller":"etcdserver/server.go:728","msg":"started as single-node; fast-forwarding election ticks","local-member-id":"8e9e05c52164694d","forward-ticks":9,"forward-duration":"900ms","election-ticks":10,"election-timeout":"1s"}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d switched to configuration voters=(10276657743932975437)"}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","caller":"membership/cluster.go:393","msg":"added member","cluster-id":"cdf818194e3a8c32","local-member-id":"8e9e05c52164694d","added-peer-id":"8e9e05c52164694d","added-peer-peer-urls":["http://localhost:2380"]}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","caller":"embed/etcd.go:580","msg":"serving peer traffic","address":"127.0.0.1:2380"}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","caller":"embed/etcd.go:276","msg":"now serving peer/client/metrics","local-member-id":"8e9e05c52164694d","initial-advertise-peer-urls":["http://localhost:2380"],"listen-peer-urls":["http://localhost:2380"],"advertise-client-urls":["http://localhost:2379"],"listen-client-urls":["http://localhost:2379"],"listen-metrics-urls":[]}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","caller":"embed/etcd.go:552","msg":"cmux::serve","address":"127.0.0.1:2380"}
+{"level":"info","ts":"2021-08-04T13:24:53.563Z","caller":"membership/cluster.go:523","msg":"updated cluster version","cluster-id":"cdf818194e3a8c32","local-member-id":"8e9e05c52164694d","from":"3.5","to":"3.5"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d is starting a new election at term 2"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d became pre-candidate at term 2"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d received MsgPreVoteResp from 8e9e05c52164694d at term 2"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d became candidate at term 3"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d received MsgVoteResp from 8e9e05c52164694d at term 3"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"8e9e05c52164694d became leader at term 3"}
+{"level":"info","ts":"2021-08-04T13:24:54.456Z","logger":"raft","caller":"etcdserver/zap_raft.go:77","msg":"raft.node: 8e9e05c52164694d elected leader 8e9e05c52164694d at term 3"}
+{"level":"info","ts":"2021-08-04T13:24:54.459Z","caller":"etcdserver/server.go:2027","msg":"published local member to cluster through raft","local-member-id":"8e9e05c52164694d","local-member-attributes":"{Name:default ClientURLs:[http://localhost:2379]}","request-path":"/0/members/8e9e05c52164694d/attributes","cluster-id":"cdf818194e3a8c32","publish-timeout":"7s"}
+{"level":"info","ts":"2021-08-04T13:24:54.459Z","caller":"embed/serve.go:98","msg":"ready to serve client requests"}
+{"level":"info","ts":"2021-08-04T13:24:54.460Z","caller":"embed/serve.go:140","msg":"serving client traffic insecurely; this is strongly discouraged!","address":"127.0.0.1:2379"}
+{"level":"info","ts":"2021-08-04T13:24:54.461Z","caller":"etcdmain/main.go:47","msg":"notifying init daemon"}
+{"level":"info","ts":"2021-08-04T13:24:54.461Z","caller":"etcdmain/main.go:53","msg":"successfully notified init daemon"}
+
+-----
+
+Adding and querying data.
+
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 put Name RRR
+OK
+[root@bf9bf04ea65c /]# /tmp/etcd-download-test/etcdctl --endpoints=localhost:2379 get Name
+Name
+RRR
+[root@bf9bf04ea65c /]#

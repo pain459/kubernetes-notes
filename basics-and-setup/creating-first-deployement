@@ -60,3 +60,8 @@ NAME                     DESIRED   CURRENT   READY   AGE
 nginx-test1-59d76658b9   3         3         3       43s
 nginx-test1-664f6969cd   0         0         0       11m
 ubuntu@ip-172-31-13-34:~$
+
+# To delete
+
+ubuntu@ip-172-31-13-34:~$ kubectl delete deployment nginx-test1
+deployment.apps "nginx-test1" deleted
