@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-demo-1
+  labels:
+    purpose: testing-deployments
+    owner: kumarrav
+
+spec:
+  template:
+    metadata:
+      name: nginx-demo
+      labels:
+        purpose: testing-deployments
+        owner: kumarrav
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.15
+  replicas: 3
+  selector:
+    matchLabels:
+      owner: kumarrav

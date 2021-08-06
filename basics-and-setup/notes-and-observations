@@ -3,3 +3,6 @@
 1. Deployment done by replicaset will maintain images with label names. In terms of capacity.
 2. If the container is deleted created out of replicaset file, a new container will be created as per the replicaset config file. But not per the actual container file.
 3. For example, a redis container can have the label same as nginx container. but replicaset will launch nginx container if we terminate redis container to balance the capacity. In this case, nginx containers are created with replicaset.
+
+# Deployment Observations.
+1. Yes, you can rollout unlimited deployments and undo them too. But, If you delete the replicaset for that deployment, we cannot undo as the revision history will be lost. 

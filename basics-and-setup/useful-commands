@@ -5,6 +5,7 @@ $ kubectl run nginx1 --image=nginx:1.17     # to create a nginx pod on the clust
 $ kubectl describe pod <name>     # To get the additional information of the running pod along with events.
 $ kubectl create -f <config.yaml>     # This will create container based on the config at yaml file.
 $ kubectl apply -f <config.yaml>      # Same purpose as above.
+$ kubectl apply/create -f <config.yaml> --record      # the record option will save the cause of actions.
 $ kubectl delete pod <name>     # to delete the running pod and containers in them.
 $ kubectl edit pod/deployment <podname/deployment name>     # This will edit the existing pod data and pull the changes.
 $ kubectl edit pod <podname>      # Same as above.
@@ -17,3 +18,10 @@ $ kubectl scope --replicas=6 <type> <name>      # One more dynamic way to update
 $ kubectl delete replicationcontroller nginx-app      # To delete the replication controller
 $ kubectl exec nginx-replicaset-app-qzhtd -it -- bash     # To ssh get into the pod.
 $ kubectl exec <pod> <options> -- <command>     # Syntax of the above.
+$ kubectl delete deployment <deploymentname>      # to delete a deployment
+$ kubectl rollout status deployment/<deployment-name>     # to check the status of deployment.
+$ kubectl rollout history deployment/<deployment-name>      # To check the history of deployment.
+$ kubectl set image deployment/<deployment-name> nginx=nginx:1.7.1      # one way to update the deployment. This will edit the live file but not the actual deployment file we used.
+$ kubectl rollout status deployment/<deployment-name>     # Check the status of the deployment.
+$ kubectl rollout history deployment/<deployment-name>      # Check the history of the deployment.
+$ kubectl rollout undo deployment/<deployment-name>     # To undo the deployment.
