@@ -1,0 +1,42 @@
+# In this demo we will try to create a deployment of nginx with 6 replicas and a service to access the system via curl.
+---
+# we will create deployment here.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-server-farm1
+  labels:
+    owner: kumarrav
+spec:
+  template:
+    metadata:
+      name: nginx-farm
+      labels:
+        type: frontend
+        owner: kumarrav
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.16
+  replicas: 3
+  selector:
+    matchLabels:
+      type: frontend
+      owner: kumarrav
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-server-farm-service
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30008
+  selector:
+    #matchLabels:
+    type: frontend
+    owner: kumarrav

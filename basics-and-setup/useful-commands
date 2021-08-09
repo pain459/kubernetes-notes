@@ -25,3 +25,6 @@ $ kubectl set image deployment/<deployment-name> nginx=nginx:1.7.1      # one wa
 $ kubectl rollout status deployment/<deployment-name>     # Check the status of the deployment.
 $ kubectl rollout history deployment/<deployment-name>      # Check the history of the deployment.
 $ kubectl rollout undo deployment/<deployment-name>     # To undo the deployment.
+$ minikube service nginx-server-farm-service --url      # We can extract the URL of the service using this command.
+$ kubectl get pods,svc      # Query about pods and services at the same time.
+$

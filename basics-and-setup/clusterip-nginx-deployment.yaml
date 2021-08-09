@@ -1,0 +1,39 @@
+# In this demo we will deploy nginx cluster and access it with the cluster IP or the service name.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-farm-test1
+  labels:
+    owner: kumarrav
+
+spec:
+  template:
+    metadata:
+      name: nginx-cluster
+      labels:
+        purpose: nginx-demo-cluster
+        owner: kumarrav
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.16
+
+  replicas: 3
+  selector:
+    matchLabels:
+      purpose: nginx-demo-cluster
+
+---
+# clusterip config starts here.
+apiversion: v1
+kind: Service
+metadata:
+  name: nginx-farm-frontend
+spec:
+  type: ClusterIP
+  ports:
+    - targetPort: 80
+      port: 80
+  selector:
+    purpose: nginx-demo-cluster
