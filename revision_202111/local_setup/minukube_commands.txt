@@ -1,0 +1,240 @@
+Steps:
+
+Install kubectl - https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+
+(base) ➜  ~ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   154  100   154    0     0     30      0  0:00:05  0:00:05 --:--:--    31
+100 44.7M  100 44.7M    0     0  5817k      0  0:00:07  0:00:07 --:--:-- 16.5M
+(base) ➜  ~ curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   154  100   154    0     0    302      0 --:--:-- --:--:-- --:--:--   302
+100    64  100    64    0     0    106      0 --:--:-- --:--:-- --:--:--   106
+(base) ➜  ~ echo "$(<kubectl.sha256) kubectl" | sha256sum --check
+kubectl: OK
+(base) ➜  ~ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+[sudo] password for ravik:
+(base) ➜  ~ kubectl version --client
+Client Version: version.Info{Major:"1", Minor:"22", GitVersion:"v1.22.3", GitCommit:"c92036820499fedefec0f847e2054d824aea6cd1", GitTreeState:"clean", BuildDate:"2021-10-27T18:41:28Z", GoVersion:"go1.16.9", Compiler:"gc", Platform:"linux/amd64"}
+(base) ➜  ~
+
+
+Installing minikube (assuming we already have virtualbox installed)
+
+(base) ➜  ~ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 65.8M  100 65.8M    0     0  3123k      0  0:00:21  0:00:21 --:--:-- 15.1M
+(base) ➜  ~ sudo install minikube-linux-amd64 /usr/local/bin/minikube
+[sudo] password for ravik:
+(base) ➜  ~ minikube start --driver=virtualbox
+😄  minikube v1.23.2 on Ubuntu 20.04
+✨  Using the virtualbox driver based on user configuration
+💿  Downloading VM boot image ...
+    > minikube-v1.23.1.iso.sha256: 65 B / 65 B [-------------] 100.00% ? p/s 0s
+    > minikube-v1.23.1.iso: 225.22 MiB / 225.22 MiB  100.00% 29.49 MiB p/s 7.8s
+👍  Starting control plane node minikube in cluster minikube
+💾  Downloading Kubernetes v1.22.2 preload ...
+    > preloaded-images-k8s-v13-v1...: 511.69 MiB / 511.69 MiB  100.00% 23.39 Mi
+🔥  Creating virtualbox VM (CPUs=2, Memory=6000MB, Disk=20000MB) ...
+🐳  Preparing Kubernetes v1.22.2 on Docker 20.10.8 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🔎  Verifying Kubernetes components...
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+(base) ➜  ~
+
+Verification:
+(base) ➜  ~ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+(base) ➜  ~
+
+--- First deployment
+
+(base) ➜  ~ kubectl get nodes
+NAME       STATUS   ROLES                  AGE     VERSION
+minikube   Ready    control-plane,master   3m42s   v1.22.2
+(base) ➜  ~ kubectl create deployment hello-minikube --image=k8s.gcr.io/echoserver:1.4
+deployment.apps/hello-minikube created
+(base) ➜  ~ kubectl get services hello-minikube
+Error from server (NotFound): services "hello-minikube" not found
+(base) ➜  ~ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   4m33s
+(base) ➜  ~ kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+hello-minikube   1/1     1            1           53s
+(base) ➜  ~ kubectl get deployments hello-minikube
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+hello-minikube   1/1     1            1           62s
+(base) ➜  ~ kubectl get services hello-minikube
+Error from server (NotFound): services "hello-minikube" not found
+(base) ➜  ~ kubectl expose deployment hello-minikube --type=NodePort --port=8080
+service/hello-minikube exposed
+(base) ➜  ~ kubectl get services hello-minikube
+NAME             TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+hello-minikube   NodePort   10.100.156.139   <none>        8080:32025/TCP   3s
+(base) ➜  ~
+
+--- Different commands
+
+(base) ➜  ~ kubectl get nodes
+NAME       STATUS   ROLES                  AGE    VERSION
+minikube   Ready    control-plane,master   6m3s   v1.22.2
+(base) ➜  ~ kubectl get services
+NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+hello-minikube   NodePort    10.100.156.139   <none>        8080:32025/TCP   50s
+kubernetes       ClusterIP   10.96.0.1        <none>        443/TCP          6m7s
+(base) ➜  ~ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+hello-minikube-6ddfcc9757-dlc7w   1/1     Running   0          2m25s
+(base) ➜  ~ kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+hello-minikube   1/1     1            1           2m33s
+(base) ➜  ~ kubectl get all
+NAME                                  READY   STATUS    RESTARTS   AGE
+pod/hello-minikube-6ddfcc9757-dlc7w   1/1     Running   0          2m41s
+
+NAME                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/hello-minikube   NodePort    10.100.156.139   <none>        8080:32025/TCP   72s
+service/kubernetes       ClusterIP   10.96.0.1        <none>        443/TCP          6m29s
+
+NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/hello-minikube   1/1     1            1           2m41s
+
+NAME                                        DESIRED   CURRENT   READY   AGE
+replicaset.apps/hello-minikube-6ddfcc9757   1         1         1       2m41s
+(base) ➜  ~
+
+--- To check the URL of the running service
+(base) ➜  ~ minikube service hello-minikube --url
+http://192.168.99.100:32025
+(base) ➜  ~
+
+--- cleanup
+
+(base) ➜  ~ kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+hello-minikube   1/1     1            1           8m10s
+(base) ➜  ~ kubectl delete deployments hello-minikube
+deployment.apps "hello-minikube" deleted
+(base) ➜  ~ kubectl get deployments
+No resources found in default namespace.
+(base) ➜  ~ kubectl get pods
+No resources found in default namespace.
+(base) ➜  ~ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   12m
+(base) ➜  ~
+
+
+--- Creating an nginx container and using it.  Didn't figure this out yet.
+# Creating a deployment.
+(base) ➜  ~ kubectl create deployment nginx --image=k8s.gcr.io/nginx:latest
+deployment.apps/nginx created
+(base) ➜  ~ kubectl get pods
+NAME                     READY   STATUS              RESTARTS   AGE
+nginx-66859d889b-xpt5h   0/1     ContainerCreating   0          8s
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-66859d889b-xpt5h   1/1     Running   0          83s
+(base) ➜  ~
+
+# Exposing the service.
+(base) ➜  ~ kubectl expose deployment nginx --type=NodePort --port=8080
+service/nginx exposed
+(base) ➜  ~ kubectl get services
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP          18m
+nginx        NodePort    10.98.57.219   <none>        8080:30519/TCP   4s
+(base) ➜  ~
+
+
+--- Creating cluster on docker with increased memory
+--- Default driver is docker.
+(base) ➜  ~ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   33m
+(base) ➜  ~ minikube stop
+✋  Stopping node "minikube"  ...
+🛑  1 nodes stopped.
+(base) ➜  ~ minikube config set memory 16384
+❗  These changes will take effect upon a minikube delete and then a minikube start
+(base) ➜  ~ minikube delete
+🔥  Deleting "minikube" in virtualbox ...
+💀  Removed all traces of the "minikube" cluster.
+(base) ➜  ~ minikube start
+😄  minikube v1.23.2 on Ubuntu 20.04
+✨  Automatically selected the docker driver. Other choices: virtualbox, ssh
+👍  Starting control plane node minikube in cluster minikube
+🚜  Pulling base image ...
+    > gcr.io/k8s-minikube/kicbase: 355.39 MiB / 355.40 MiB  100.00% 2.58 MiB p/
+🔥  Creating docker container (CPUs=2, Memory=16384MB) ...
+🐳  Preparing Kubernetes v1.22.2 on Docker 20.10.8 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+(base) ➜  ~
+
+--- status at docker.
+(base) ➜  ~ docker image ls
+REPOSITORY                    TAG       IMAGE ID       CREATED        SIZE
+gcr.io/k8s-minikube/kicbase   v0.0.27   9fa1cc16ad6d   6 weeks ago    1.08GB
+ubuntu                        latest    fb52e22af1b0   2 months ago   72.8MB
+(base) ➜  ~ docker container ls
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED              STATUS              PORTS                                                                                                                                  NAMES
+7dd507ea6b9b   gcr.io/k8s-minikube/kicbase:v0.0.27   "/usr/local/bin/entr…"   About a minute ago   Up About a minute   127.0.0.1:49157->22/tcp, 127.0.0.1:49156->2376/tcp, 127.0.0.1:49155->5000/tcp, 127.0.0.1:49154->8443/tcp, 127.0.0.1:49153->32443/tcp   minikube
+(base) ➜  ~
+(base) ➜  ~ kubectl get pods
+NAME                     READY   STATUS              RESTARTS   AGE
+nginx-55649fd747-pkvsh   0/1     ContainerCreating   0          46s
+(base) ➜  ~ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-55649fd747-pkvsh   1/1     Running   0          60s
+(base) ➜  ~ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   7m24s
+(base) ➜  ~ kubectl expose deployment nginx --type=NodePort --port=8080
+service/nginx exposed
+(base) ➜  ~ minikube service nginx --url
+http://192.168.49.2:31129
+
+# Nginx is not accessible during this experiment.
+
+--- to get into a running container.
+(base) ➜  ~ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-55649fd747-pkvsh   1/1     Running   0          8m46s
+(base) ➜  ~ kubectl exec --stdin --tty nginx-55649fd747-pkvsh -- /bin/bash
+root@nginx-55649fd747-pkvsh:/#
+
+--- cleanup
+(base) ➜  ~ minikube stop
+✋  Stopping node "minikube"  ...
+🛑  Powering off "minikube" via SSH ...
+🛑  1 nodes stopped.
+(base) ➜  ~ minikube delete --all
+🔥  Deleting "minikube" in docker ...
+🔥  Removing /home/ravik/.minikube/machines/minikube ...
+💀  Removed all traces of the "minikube" cluster.
+🔥  Successfully deleted all profiles
+(base) ➜  ~
+
+--- get more details about the pods
+$ kubectl describe pod nginx
+--- provide more data about the pod
+$ kubectl get pods -o wide

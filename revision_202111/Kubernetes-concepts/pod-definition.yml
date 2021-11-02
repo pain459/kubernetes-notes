@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata: # name and labels are only expected.
+  name: myapp-pod
+  labels: # any kind of key value pairs are accepted
+    app: myapp
+    type: front-end
+
+spec:  # containers and image data
+  containers:
+    - name: nginx-container  # - signifies first item in the list
+      image: nginx

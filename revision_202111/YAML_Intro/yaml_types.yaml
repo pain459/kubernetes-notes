@@ -1,0 +1,85 @@
+# Do not execute. This file is created for demo only.
+# sample YAML format
+Servers:
+  - name: Server1
+    owner: John
+    created: 12232012
+    status: active
+
+# data representation in YAML
+# Array/Lists
+Fruits:
+  - Orange
+  - Apple
+  - Banana
+
+Vegetables:
+  - Carrot
+  - Cauliflower
+  - Tomato
+
+# Dictionary/Map
+Banana:
+  Calories: 105
+  Fat: 0.4 g
+  Carbs: 27 g
+
+Grapes:
+  Calories: 62
+  Fat: 0.3 g
+  Carbs: 16 g
+
+# YAML advanced
+# List of dictionaries in YAML
+# key value/dictionary/lists
+Fruits1:
+  - Banana:
+      Calories: 105
+      Fat: 0.4 g
+      Carbs: 27 g
+  - Grape:
+      Calories: 62
+      Fat: 0.3 g
+      Carbs: 16 g
+
+# Dictionary vs List vs List Of Dictionaries
+# Car example
+# Dictionary
+Color: Blue
+Model: Corvette
+Transmission: Manual
+Price: $20,000
+# Dictionary in a dictionary
+Color: Blue
+Model:
+  Name: Corvette
+  Year: 1995
+Transmission: Manual
+Price: $20,000
+# list of dictionaries
+- Blue Corvette
+  Color: Blue
+  Model:
+    Name: Corvette
+    Year: 1995
+  Transmission: Manual
+  Price: $21,000
+- Grey Corvette
+  Color: Grey
+  Model:
+    Name: Corvette
+    Year: 1994
+  Transmission: Automatic
+  Price: $22,000
+- Red Corvette
+  Color: Red
+  Model:
+    Name: Corvette
+    Year: 1996
+  Transmission: Manual
+  Price: $23,000
+
+  # Notes
+  # dictionary can be unordered.
+  # list/array is ordered.
+  # line starting with hash is a comment.

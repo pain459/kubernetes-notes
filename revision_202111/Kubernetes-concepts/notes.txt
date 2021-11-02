@@ -1,0 +1,18 @@
+# pod-definition.yml
+# top level or root level properties
+# below is the default set.
+apiVersion:
+kind:
+metadata:
+
+
+spec:
+
+# memorize this table
+---------------------
+kind      |   version
+----------|----------
+POD           v1
+Service       v1
+Replicaset    apps/v1
+Deployment    apps/v1

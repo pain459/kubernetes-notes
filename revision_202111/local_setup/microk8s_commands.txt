@@ -1,0 +1,24 @@
+To check the status
+$ microk8s status --wait-ready
+
+To start the microk8s
+$ microk8s start
+
+To stop the microk8s
+$ microk8s stop
+
+Accessing k8s
+$ microk8s kubectl get nodes
+$ microk8s kubectl get services
+
+Tip:
+MicroK8s uses a namespaced kubectl command to prevent conflicts with any existing installs of kubectl. If you don’t have an existing install, it is easier to add an alias (append to ~/.bash_aliases) like this:
+
+Add the below line and source it.
+alias kubectl='microk8s kubectl'
+
+Quickly deploy and app and check.
+$ microk8s kubectl create deployment nginx --image=nginx
+
+It may take a minute or two to install, but you can check the status:
+$ microk8s kubectl get pods
