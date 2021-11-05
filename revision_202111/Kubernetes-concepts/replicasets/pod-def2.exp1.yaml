@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx-standalone1
+    labels:
+        type: addedtofarm
+
+
+spec:
+    containers:
+        - name: nginx-container
+          image: nginx

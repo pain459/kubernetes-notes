@@ -1,0 +1,743 @@
+Replication controllers:
+* high availability
+* load balancing & scaling
+
+Replication controller is the old tech.
+It is replaced by Replica Set.
+
+
+After writing the yaml file below is the process to start the containers.
+
+(base) ➜  replicasets git:(main) ✗ kubectl create -f rc-definition.yaml 
+replicationcontroller/myapp-rc created
+(base) ➜  replicasets git:(main) ✗ kubectl get replicationcontroller
+NAME       DESIRED   CURRENT   READY   AGE
+myapp-rc   3         3         2       10s
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME             READY   STATUS    RESTARTS   AGE
+myapp-rc-4wf8q   1/1     Running   0          25s
+myapp-rc-jtcbq   1/1     Running   0          25s
+myapp-rc-wdq67   1/1     Running   0          25s
+
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+myapp-replicaset   3         3         3       5h3m
+
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+myapp-rc-4wf8q           1/1     Running   0          5h16m
+myapp-rc-jtcbq           1/1     Running   0          5h16m
+myapp-rc-wdq67           1/1     Running   0          5h16m
+myapp-replicaset-hlsqc   1/1     Running   0          5h4m
+myapp-replicaset-mqfh4   1/1     Running   0          5h4m
+myapp-replicaset-t6rrl   1/1     Running   0          5h4m
+(base) ➜  replicasets git:(main) ✗ 
+
+-----
+
+# test by killing one pod from the replication controller
+
+# As soon as you kill it, new pod is being created.
+(base) ➜  replicasets git:(main) ✗ kubectl delete pod myapp-rc-4wf8q
+pod "myapp-rc-4wf8q" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods                 
+NAME                     READY   STATUS              RESTARTS   AGE
+myapp-rc-jtcbq           1/1     Running             0          5h17m
+myapp-rc-vjlw4           0/1     ContainerCreating   0          4s
+myapp-rc-wdq67           1/1     Running             0          5h17m
+myapp-replicaset-hlsqc   1/1     Running             0          5h5m
+myapp-replicaset-mqfh4   1/1     Running             0          5h5m
+myapp-replicaset-t6rrl   1/1     Running             0          5h5m
+(base) ➜  replicasets git:(main) ✗ 
+
+# kill one pod from the replicaset and test the behaviour
+
+# as soon as you kill one pod, another one is being created in replicaset.
+
+(base) ➜  replicasets git:(main) ✗ kubectl delete pod myapp-replicaset-t6rrl
+pod "myapp-replicaset-t6rrl" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods                         
+NAME                     READY   STATUS              RESTARTS   AGE
+myapp-rc-jtcbq           1/1     Running             0          5h18m
+myapp-rc-vjlw4           1/1     Running             0          80s
+myapp-rc-wdq67           1/1     Running             0          5h18m
+myapp-replicaset-hlsqc   1/1     Running             0          5h6m
+myapp-replicaset-lvv5l   0/1     ContainerCreating   0          2s
+myapp-replicaset-mqfh4   1/1     Running             0          5h6m
+(base) ➜  replicasets git:(main) ✗ 
+
+
+# cleaning up existing replicationcontrollers and replicasets
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicationcontroller
+NAME       DESIRED   CURRENT   READY   AGE
+myapp-rc   3         3         3       5h27m
+(base) ➜  replicasets git:(main) ✗ kubectl delete replicationcontroller myapp-rc
+replicationcontroller "myapp-rc" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+myapp-replicaset   3         3         3       5h16m
+(base) ➜  replicasets git:(main) ✗ kubectl delete replicaset myapp-replicaset
+replicaset.apps "myapp-replicaset" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+No resources found in default namespace.
+(base) ➜  replicasets git:(main) ✗ 
+
+
+# Experiment 1
+
+1. Create 2 pods with common labels individually.
+2. Create a replicaset freshly with 4 replicas in it. 
+3. Link the above two with tag information.
+4. Observe the behaviour.
+
+Observations:
+
+1. pod-definition to create pods can be used only once. No duplicate pod names allowed.
+2. Even if you copy the file, the content of the file to be changes. Else the system will report unchanged.
+
+(base) ➜  replicasets git:(main) ✗ kubectl apply -f pod-def.exp1.yaml
+pod/nginx-standalone created
+(base) ➜  replicasets git:(main) ✗ kubectl get pods 
+NAME               READY   STATUS    RESTARTS   AGE
+nginx-standalone   1/1     Running   0          6s
+(base) ➜  replicasets git:(main) ✗ kubectl apply -f pod-def.exp1.yaml
+pod/nginx-standalone unchanged
+(base) ➜  replicasets git:(main) ✗ ll
+total 16K
+-rw-rw-r-- 1 ravik ravik 4.0K Nov  4 16:05 notes.txt
+-rw-rw-r-- 1 ravik ravik  179 Nov  4 16:11 pod-def1.exp1.yaml
+-rw-rw-r-- 1 ravik ravik  402 Nov  4 10:32 rc-definition.yaml
+-rw-rw-r-- 1 ravik ravik  464 Nov  4 15:47 replicaset-definition.yaml
+(base) ➜  replicasets git:(main) ✗ cp pod-def1.exp1.yaml pod-def2.exp1.yaml
+(base) ➜  replicasets git:(main) ✗ kubectl apply -f pod-def2.exp1.yaml 
+pod/nginx-standalone unchanged
+(base) ➜  replicasets git:(main) ✗ 
+
+
+Contents of the deployment
+=======
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx-standalone
+    labels:
+        type: addedtofarm
+
+
+spec:
+    containers:
+        - name: nginx-container
+          image: nginx
+=======
+
+3. Modifying atleast one value will allow the creation. I modified the name at metadata in the yaml file and recreated the deployment.
+
+(base) ➜  replicasets git:(main) ✗ kubectl apply -f pod-def2.exp1.yaml
+pod/nginx-standalone1 created
+(base) ➜  replicasets git:(main) ✗ 
+
+4. deployment status now.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get pods                   
+NAME                READY   STATUS    RESTARTS   AGE
+nginx-standalone    1/1     Running   0          9m54s
+nginx-standalone1   1/1     Running   0          77s
+
+5. Create replicaset with 4 replicas of nginx container, matching the labels from above replicas. 
+=======
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+    name: myreplicaset-nginx
+    labels:
+        type: addedtofarm
+
+
+spec:
+    template:
+        metadata:
+            name: mynginx-infarm
+            labels:
+                type: addedtofarm
+        spec:
+            containers:
+                - name: nginx-container
+                  image: nginx
+    replicas: 4
+    selector:
+        matchLabels:
+            type: addedtofarm
+
+=======
+
+6. You can see only 2 containers starting from replicaset and other 2 are grabbed from the existing containers.
+
+(base) ➜  replicasets git:(main) ✗ kubectl apply -f pod-replicaset1-exp1.yaml 
+replicaset.apps/myreplicaset-nginx created
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME                       READY   STATUS              RESTARTS   AGE
+myreplicaset-nginx-2zrhp   0/1     ContainerCreating   0          4s
+myreplicaset-nginx-ddk75   0/1     ContainerCreating   0          4s
+nginx-standalone           1/1     Running             0          32m
+nginx-standalone1          1/1     Running             0          23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME                       READY   STATUS    RESTARTS   AGE
+myreplicaset-nginx-2zrhp   1/1     Running   0          19s
+myreplicaset-nginx-ddk75   1/1     Running   0          19s
+nginx-standalone           1/1     Running   0          32m
+nginx-standalone1          1/1     Running   0          24m
+
+
+7. Delete a pod from replicaset created pods myreplicaset-nginx-* and see that recreating.
+
+(base) ➜  replicasets git:(main) ✗ kubectl delete pod myreplicaset-nginx-2zrhp
+pod "myreplicaset-nginx-2zrhp" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods                           
+NAME                       READY   STATUS              RESTARTS   AGE
+myreplicaset-nginx-ddk75   1/1     Running             0          2m42s
+myreplicaset-nginx-rhbmg   0/1     ContainerCreating   0          3s
+nginx-standalone           1/1     Running             0          35m
+nginx-standalone1          1/1     Running             0          26m
+(base) ➜  replicasets git:(main) ✗ 
+
+8. Delete a pod created from standalone file and observe it getting recreated. Keep a note on the name.
+
+(base) ➜  replicasets git:(main) ✗ kubectl delete pod nginx-standalone1
+pod "nginx-standalone1" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods                    
+NAME                       READY   STATUS              RESTARTS   AGE
+myreplicaset-nginx-ddk75   1/1     Running             0          3m46s
+myreplicaset-nginx-rhbmg   1/1     Running             0          67s
+myreplicaset-nginx-xsnhl   0/1     ContainerCreating   0          2s
+nginx-standalone           1/1     Running             0          36m
+(base) ➜  replicasets git:(main) ✗ 
+
+Container started from the replicaset definition file.
+
+9. Create another replicaset with different image and match the tags. But use some other image and see the behaviour.
+
+(base) ➜  replicasets git:(main) ✗ cat pod-replicaset2-exp1.yaml          
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+    name: redis-replicaset
+    labels:
+        type: addedtofarm
+            
+
+spec:
+    template:
+        metadata:
+            name: redis-containers
+            labels:
+                type: addedtofarm
+        spec:
+            containers:
+                - name: redis
+                  image: redis
+    replicas: 6
+    selector:
+        matchLabels:
+            type: addedtofarm
+
+========
+They form 2 replica sets due to the metadata changes.
+(base) ➜  replicasets git:(main) ✗ kubectl get replicasets
+NAME                 DESIRED   CURRENT   READY   AGE
+myreplicaset-nginx   4         4         4       12m
+redis-replicaset     6         6         6       3m32s
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME                       READY   STATUS    RESTARTS   AGE
+myreplicaset-nginx-ddk75   1/1     Running   0          19m
+myreplicaset-nginx-rhbmg   1/1     Running   0          16m
+myreplicaset-nginx-xsnhl   1/1     Running   0          15m
+nginx-standalone           1/1     Running   0          51m
+redis-replicaset-d8fz7     1/1     Running   0          9m57s
+redis-replicaset-gz7fw     1/1     Running   0          9m57s
+redis-replicaset-hzsdp     1/1     Running   0          9m57s
+redis-replicaset-kcn5p     1/1     Running   0          9m57s
+redis-replicaset-qnlrm     1/1     Running   0          9m57s
+redis-replicaset-z7rtw     1/1     Running   0          9m57s
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+#### Exteriment completed ####
+
+
+Scaling the existing replicasets
+
+1. By updating the replica count in definition yaml file.
+
+Updated replicas count for redis containers to 8
+
+(base) ➜  replicasets git:(main) ✗ kubectl replace -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset replaced
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-56b5w     1/1     Running   0          9s
+redis-replicaset-d8fz7     1/1     Running   0          19m
+redis-replicaset-gz7fw     1/1     Running   0          19m
+redis-replicaset-hzsdp     1/1     Running   0          19m
+redis-replicaset-kcn5p     1/1     Running   0          19m
+redis-replicaset-mqkqk     1/1     Running   0          9s
+redis-replicaset-qnlrm     1/1     Running   0          19m
+redis-replicaset-z7rtw     1/1     Running   0          19m
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   8         8         8       20m
+(base) ➜  replicasets git:(main) ✗ 
+
+2. By passing number of replicas via kubectl by not updating the deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=4 -f pod-replicaset2-exp1.yaml
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       23m
+(base) ➜  replicasets git:(main) ✗ kubectl get pods | grep redis
+redis-replicaset-hzsdp     1/1     Running   0          23m
+redis-replicaset-kcn5p     1/1     Running   0          23m
+redis-replicaset-qnlrm     1/1     Running   0          23m
+redis-replicaset-z7rtw     1/1     Running   0          23m
+(base) ➜  replicasets git:(main) ✗ 
+
+3. Scale the replicaset directly without using deployment file.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   4         4         4       24m
+(base) ➜  replicasets git:(main) ✗ kubectl scale --replicas=5 replicaset redis-replicaset
+replicaset.apps/redis-replicaset scaled
+(base) ➜  replicasets git:(main) ✗ kubectl get replicaset redis-replicaset
+NAME               DESIRED   CURRENT   READY   AGE
+redis-replicaset   5         5         5       24m
+(base) ➜  replicasets git:(main) ✗ 
+
+4. deleting the replica sets.
+
+(base) ➜  replicasets git:(main) ✗ kubectl get replicasets
+NAME                 DESIRED   CURRENT   READY   AGE
+myreplicaset-nginx   4         4         4       48m
+redis-replicaset     5         5         5       38m
+(base) ➜  replicasets git:(main) ✗ kubectl delete replicasets myreplicaset-nginx redis-replicaset
+replicaset.apps "myreplicaset-nginx" deleted
+replicaset.apps "redis-replicaset" deleted
+(base) ➜  replicasets git:(main) ✗ kubectl get pods
+NAME                       READY   STATUS        RESTARTS   AGE
+myreplicaset-nginx-mwtrm   1/1     Terminating   0          13m
+myreplicaset-nginx-rhbmg   1/1     Terminating   0          45m
+redis-replicaset-hzsdp     0/1     Terminating   0          39m
+redis-replicaset-z7rtw     1/1     Terminating   0          39m
+(base) ➜  replicasets git:(main) ✗ 
+
+=======
+
+

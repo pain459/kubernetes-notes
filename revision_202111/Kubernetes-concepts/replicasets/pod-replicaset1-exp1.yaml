@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+    name: myreplicaset-nginx
+    labels:
+        type: addedtofarm
+
+
+spec:
+    template:
+        metadata:
+            name: mynginx-infarm
+            labels:
+                type: addedtofarm
+        spec:
+            containers:
+                - name: nginx-container
+                  image: nginx
+    replicas: 4
+    selector:
+        matchLabels:
+            type: addedtofarm
+

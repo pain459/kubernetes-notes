@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod  # Its case sensitive. Pod is different from pod
+metadata:
+    name: myapp-pod
+    labels:
+        app: myapp
+
+
+spec:
+    containers:
+        - name: nginx
+          image: nginx

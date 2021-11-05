@@ -238,3 +238,6 @@ root@nginx-55649fd747-pkvsh:/#
 $ kubectl describe pod nginx
 --- provide more data about the pod
 $ kubectl get pods -o wide
+
+--- Create a new pod from image
+$ kubectl run nginx --image=nginx

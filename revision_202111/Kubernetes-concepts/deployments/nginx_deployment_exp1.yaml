@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment
+    labels:
+        type: test-env
+        owner: kumarrav
+
+spec:
+    template:
+        metadata:
+            name: nginx-template
+            labels:
+                type: test-env
+                owner: kumarrav
+
+        spec:
+            containers:
+                - name: nginx-container
+                  image: nginx:latest
+    replicas: 10
+    selector:
+        matchLabels:
+            type: test-env

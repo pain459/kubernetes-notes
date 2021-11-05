@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+    name: redis-replicaset
+    labels:
+        type: addedtofarm
+            
+
+spec:
+    template:
+        metadata:
+            name: redis-containers
+            labels:
+                type: addedtofarm
+        spec:
+            containers:
+                - name: redis
+                  image: redis
+    replicas: 8
+    selector:
+        matchLabels:
+            type: addedtofarm

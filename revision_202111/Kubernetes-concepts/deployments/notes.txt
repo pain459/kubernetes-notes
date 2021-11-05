@@ -1,0 +1,227 @@
+1. Only 1 change observed in the entire deployment based yaml file is 
+
+kind: Deployment
+
+Rest all is the same.
+
+2. Commands:
+
+$ kubectl create -f deployment.yaml
+$ kubectl get deployments
+$ kubectl get replicaset
+
+3. heirarchy
+
+deployment --> replicaset --> pods --> containers
+
+----
+
+Deploying the nginx pods with 4 replicas
+
+(base) ➜  deployments git:(main) ✗ kubectl create -f nginx_deployment_exp1.yaml
+deployment.apps/nginx-deployment created
+(base) ➜  deployments git:(main) ✗ kubectl get deployments
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   1/4     4            1           8s
+(base) ➜  deployments git:(main) ✗ kubectl get deployments
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   4/4     4            4           17s
+(base) ➜  deployments git:(main) ✗ kubectl get replicasets
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-b959b554d   4         4         4       77s
+(base) ➜  deployments git:(main) ✗ kubectl get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-b959b554d-7wjnf   1/1     Running   0          88s
+nginx-deployment-b959b554d-94p5k   1/1     Running   0          88s
+nginx-deployment-b959b554d-gw9cf   1/1     Running   0          88s
+nginx-deployment-b959b554d-j4t8j   1/1     Running   0          88s
+
+----
+deployment file: nginx_deployment_exp1.yaml
+
+---
+
+Experiment:
+
+1. What happens if we delete the pod?
+
+New one is created.
+
+(base) ➜  deployments git:(main) ✗ kubectl delete pod nginx-deployment-b959b554d-7wjnf
+pod "nginx-deployment-b959b554d-7wjnf" deleted
+(base) ➜  deployments git:(main) ✗ kubectl get pods                                   
+NAME                               READY   STATUS              RESTARTS   AGE
+nginx-deployment-b959b554d-94p5k   1/1     Running             0          5m9s
+nginx-deployment-b959b554d-gw9cf   1/1     Running             0          5m9s
+nginx-deployment-b959b554d-j4t8j   1/1     Running             0          5m9s
+nginx-deployment-b959b554d-kww8m   0/1     ContainerCreating   0          2s
+(base) ➜  deployments git:(main) ✗ 
+
+2. what happens if you delete the replicaset?
+
+Replicaset will become empty and containers will be recreated. Replicaset name is observed unchanged.
+
+(base) ➜  deployments git:(main) ✗ kubectl get replicaset
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-b959b554d   4         4         4       5m41s
+(base) ➜  deployments git:(main) ✗ kubectl delete replicaset nginx-deployment-b959b554d
+replicaset.apps "nginx-deployment-b959b554d" deleted
+(base) ➜  deployments git:(main) ✗ kubectl get pods                                    
+NAME                               READY   STATUS              RESTARTS   AGE
+nginx-deployment-b959b554d-87swd   0/1     ContainerCreating   0          2s
+nginx-deployment-b959b554d-d4bvt   0/1     ContainerCreating   0          2s
+nginx-deployment-b959b554d-g8cw6   0/1     ContainerCreating   0          2s
+nginx-deployment-b959b554d-gw9cf   1/1     Terminating         0          5m54s
+nginx-deployment-b959b554d-j4t8j   1/1     Terminating         0          5m54s
+nginx-deployment-b959b554d-kww8m   1/1     Terminating         0          47s
+nginx-deployment-b959b554d-rnvgb   0/1     ContainerCreating   0          2s
+(base) ➜  deployments git:(main) ✗ kubectl get replicasets
+NAME                         DESIRED   CURRENT   READY   AGE
+nginx-deployment-b959b554d   4         4         1       8s
+(base) ➜  deployments git:(main) ✗ kubectl get pods       
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-b959b554d-87swd   1/1     Running   0          35s
+nginx-deployment-b959b554d-d4bvt   1/1     Running   0          35s
+nginx-deployment-b959b554d-g8cw6   1/1     Running   0          35s
+nginx-deployment-b959b554d-rnvgb   1/1     Running   0          35s
+(base) ➜  deployments git:(main) ✗ 
+
+
+3. Updating the deployment
+
+Updated the replicas to 3 for demo purposes.
+
+(base) ➜  deployments git:(main) ✗ kubectl apply -f nginx_deployment_exp1.yaml 
+deployment.apps/nginx-deployment configured
+(base) ➜  deployments git:(main) ✗ kubectl get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-b959b554d-87swd   1/1     Running   0          3m34s
+nginx-deployment-b959b554d-d4bvt   1/1     Running   0          3m34s
+nginx-deployment-b959b554d-rnvgb   1/1     Running   0          3m34s
+(base) ➜  deployments git:(main) ✗ 
+
+4. Try rolling updates by updating the image.
+
+Updated replicas to 10 and updated image id
+
+(base) ➜  deployments git:(main) ✗ kubectl apply -f nginx_deployment_exp1.yaml
+deployment.apps/nginx-deployment configured
+(base) ➜  deployments git:(main) ✗ kubectl get pods                           
+NAME                                READY   STATUS              RESTARTS   AGE
+nginx-deployment-697fc66b4b-2ckcl   0/1     Pending             0          3s
+nginx-deployment-697fc66b4b-9494g   0/1     Pending             0          3s
+nginx-deployment-697fc66b4b-9c5x2   0/1     Pending             0          3s
+nginx-deployment-697fc66b4b-wspfq   0/1     Pending             0          3s
+nginx-deployment-697fc66b4b-zzhr2   0/1     ContainerCreating   0          3s
+nginx-deployment-b959b554d-5pnrv    0/1     Pending             0          3s
+nginx-deployment-b959b554d-87swd    1/1     Running             0          9m49s
+nginx-deployment-b959b554d-d4bvt    1/1     Running             0          9m49s
+nginx-deployment-b959b554d-dzzfb    0/1     Pending             0          3s
+nginx-deployment-b959b554d-m774c    0/1     Terminating         0          3s
+nginx-deployment-b959b554d-mrtp8    0/1     ContainerCreating   0          3s
+nginx-deployment-b959b554d-n6rwg    0/1     ContainerCreating   0          3s
+nginx-deployment-b959b554d-pdv5w    0/1     Terminating         0          3s
+nginx-deployment-b959b554d-rnvgb    1/1     Running             0          9m49s
+nginx-deployment-b959b554d-wn5xm    0/1     ContainerCreating   0          3s
+
+
+5. Inducing faulty image name and update the deployment.
+
+Updated image tag to some number greater than current version of nginx 100.25 and applied the config.
+
+(base) ➜  deployments git:(main) ✗ kubectl get pods
+NAME                                READY   STATUS             RESTARTS   AGE
+nginx-deployment-68f9c8df46-5d55s   0/1     ImagePullBackOff   0          6m57s
+nginx-deployment-68f9c8df46-5jw95   0/1     ImagePullBackOff   0          6m57s
+nginx-deployment-68f9c8df46-ckhzk   0/1     ImagePullBackOff   0          6m57s
+nginx-deployment-68f9c8df46-m9qgm   0/1     ImagePullBackOff   0          6m57s
+nginx-deployment-68f9c8df46-msr96   0/1     ErrImagePull       0          6m57s
+nginx-deployment-697fc66b4b-2ckcl   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-55dzq   1/1     Running            0          11m
+nginx-deployment-697fc66b4b-9494g   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-9c5x2   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-9nbfq   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-wspfq   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-z2bwq   1/1     Running            0          12m
+nginx-deployment-697fc66b4b-zzhr2   1/1     Running            0          12m
+(base) ➜  deployments git:(main) ✗ 
+
+We can observe that atleast 9 containers are running and rest of the containers are trying to boot up with the new image, ofcourse failing.
+
+current replicaset is looking like this 
+
+(base) ➜  deployments git:(main) ✗ kubectl get replicasets
+NAME                          DESIRED   CURRENT   READY   AGE
+nginx-deployment-68f9c8df46   5         5         0       8m57s
+nginx-deployment-697fc66b4b   8         8         8       14m
+nginx-deployment-b959b554d    0         0         0       24m
+(base) ➜  deployments git:(main) ✗ 
+
+We can also observe the deployment status as below.
+
+(base) ➜  deployments git:(main) ✗ kubectl get deployment
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   8/10    5            8           30m
+
+6. correct the version at deployment and then observe the output
+
+Updated the tags to nginx:latest and re-applied the file. For every time we apply one replicaset is getting created.
+
+(base) ➜  deployments git:(main) ✗ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-6b4c6c787f-c25nn   1/1     Running   0          75s
+nginx-deployment-6b4c6c787f-dlf55   1/1     Running   0          66s
+nginx-deployment-6b4c6c787f-hcf87   1/1     Running   0          75s
+nginx-deployment-6b4c6c787f-j8wfj   1/1     Running   0          62s
+nginx-deployment-6b4c6c787f-n7smq   1/1     Running   0          55s
+nginx-deployment-6b4c6c787f-nzx92   1/1     Running   0          58s
+nginx-deployment-6b4c6c787f-pwqtd   1/1     Running   0          69s
+nginx-deployment-6b4c6c787f-rsjck   1/1     Running   0          75s
+nginx-deployment-6b4c6c787f-smthg   1/1     Running   0          75s
+nginx-deployment-6b4c6c787f-ssb29   1/1     Running   0          75s
+(base) ➜  deployments git:(main) ✗ kubectl get replicasets
+NAME                          DESIRED   CURRENT   READY   AGE
+nginx-deployment-68f9c8df46   0         0         0       14m
+nginx-deployment-697fc66b4b   0         0         0       19m
+nginx-deployment-6b4c6c787f   10        10        10      78s
+nginx-deployment-b959b554d    0         0         0       29m
+(base) ➜  deployments git:(main) ✗ kubectl get deployments
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   10/10   10           10          35m
+(base) ➜  deployments git:(main) ✗ 
+
+7. Can we delete replicasets? 
+
+(base) ➜  deployments git:(main) ✗ kubectl delete replicaset nginx-deployment-6b4c6c787f
+replicaset.apps "nginx-deployment-6b4c6c787f" deleted
+(base) ➜  deployments git:(main) ✗ kubectl get replicasets                              
+NAME                          DESIRED   CURRENT   READY   AGE
+nginx-deployment-68f9c8df46   0         0         0       15m
+nginx-deployment-697fc66b4b   0         0         0       20m
+nginx-deployment-6b4c6c787f   10        10        0       1s
+nginx-deployment-b959b554d    0         0         0       30m
+(base) ➜  deployments git:(main) ✗ kubectl get pods                                     
+NAME                                READY   STATUS              RESTARTS   AGE
+nginx-deployment-6b4c6c787f-2nfn6   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-2xnrd   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-5kxch   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-c25nn   1/1     Terminating         0          2m27s
+nginx-deployment-6b4c6c787f-cjlb2   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-dlf55   1/1     Terminating         0          2m18s
+nginx-deployment-6b4c6c787f-dxc8c   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-gb7pw   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-j8wfj   1/1     Terminating         0          2m14s
+nginx-deployment-6b4c6c787f-n7smq   1/1     Terminating         0          2m7s
+nginx-deployment-6b4c6c787f-nzx92   1/1     Terminating         0          2m10s
+nginx-deployment-6b4c6c787f-pwqtd   1/1     Terminating         0          2m21s
+nginx-deployment-6b4c6c787f-rjcnp   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-rvzzh   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-ssb29   0/1     Terminating         0          2m27s
+nginx-deployment-6b4c6c787f-x66kw   0/1     ContainerCreating   0          8s
+nginx-deployment-6b4c6c787f-znjx8   0/1     ContainerCreating   0          8s
+(base) ➜  deployments git:(main) ✗ 
+
+
+yes, we can but k8s will recreate the containers. replica age will be changed.
+
+
