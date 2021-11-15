@@ -1,0 +1,8 @@
+# Give the status of the rollouts.
+> kubectl rollout status deployment/my-deployment
+
+# get the rollout history of our deployment
+> kubectl rollout history deployment/my-deployment
+
+# rollback deployment
+> kubectl rollout undo deployment/my-deployment
