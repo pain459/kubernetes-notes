@@ -1,0 +1,24 @@
+(base) ➜  deployments git:(main) kubectl apply -f nginx_deployment_exp1.yaml 
+deployment.apps/nginx-deployment created
+
+(base) ➜  deployments git:(main) ✗ kubectl get pods
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-6b4c6c787f-2vs9l   1/1     Running   0          7m21s
+nginx-deployment-6b4c6c787f-2wc54   1/1     Running   0          7m21s
+nginx-deployment-6b4c6c787f-5kb7c   1/1     Running   0          7m21s
+nginx-deployment-6b4c6c787f-5qft2   1/1     Running   0          7m21s
+nginx-deployment-6b4c6c787f-v2vfw   1/1     Running   0          7m21s
+nginx-deployment-6b4c6c787f-wkszw   1/1     Running   0          7m21s
+
+(base) ➜  services git:(main) ✗ kubectl create -f service_definition.yaml 
+service/nginx-service created
+
+(base) ➜  services git:(main) ✗ kubectl get service
+NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP        22d
+nginx-service   NodePort    10.105.139.57   <none>        80:30004/TCP   8s
+
+(base) ➜  services git:(main) ✗ minikube service nginx-service --url
+http://192.168.99.102:30004
+
+nginx should be available at above address.
